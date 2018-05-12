@@ -14,6 +14,11 @@ app_simple_api:
     path: /api/simple/number
     controller: App\Controller\SimpleAPIController::number
 
+app_create_project_api:
+    path: /api/project/create/{projectName}/{projectDescription}
+    controller: App\Controller\SimpleAPIController::createProject
+
+
 #fos user
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/security.xml"

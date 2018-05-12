@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use App\Entity\User as User;
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProjectRepository")
  */
@@ -27,7 +29,8 @@ class Project
     private $description;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="user_id")
      */
     private $user_id;
 
@@ -65,7 +68,7 @@ class Project
         return $this->user_id;
     }
 
-    public function setUserId(int $user_id): self
+    public function setUserId(User $user_id): self
     {
         $this->user_id = $user_id;
 

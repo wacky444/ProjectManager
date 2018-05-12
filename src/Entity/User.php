@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="user")
+ * @ORM\Table(name="fos_user")
  */
 class User extends BaseUser
 {
@@ -17,6 +17,13 @@ class User extends BaseUser
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $user_id;
+
+
+    /**
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="projects")
+     */
+    private $projects;
+
 
     public function __construct()
     {
