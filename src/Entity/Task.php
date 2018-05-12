@@ -14,11 +14,6 @@ class Task
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
     private $task_id;
 
     /**
@@ -36,21 +31,9 @@ class Task
      */
     private $description;
 
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    public function getTaskId(): ?int
+    public function getTaskId()
     {
         return $this->task_id;
-    }
-
-    public function setTaskId(int $task_id): self
-    {
-        $this->task_id = $task_id;
-
-        return $this;
     }
 
     public function getProjectId(): ?int

@@ -14,7 +14,7 @@ class Project
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private $project_id;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -29,16 +29,11 @@ class Project
     /**
      * @ORM\Column(type="integer")
      */
-    private $project_id;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
     private $user_id;
 
-    public function getId()
+    public function getProjectId()
     {
-        return $this->id;
+        return $this->project_id;
     }
 
     public function getName(): ?string
@@ -61,18 +56,6 @@ class Project
     public function setDescription(?string $description): self
     {
         $this->description = $description;
-
-        return $this;
-    }
-
-    public function getProjectId(): ?int
-    {
-        return $this->project_id;
-    }
-
-    public function setProjectId(int $project_id): self
-    {
-        $this->project_id = $project_id;
 
         return $this;
     }
