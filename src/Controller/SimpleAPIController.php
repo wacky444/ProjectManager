@@ -22,7 +22,7 @@ class SimpleAPIController extends Controller
 
         //Check that the input has only valid characters
         $validCharacters = $validationFunctions->checkValidCharacters($logger, $projectName, $projectDescription);
-        $logger->error('An error occurred');
+
         if($validCharacters["isValid"]){
             $project = new Project();
             $project->setName($projectName);
@@ -43,6 +43,7 @@ class SimpleAPIController extends Controller
 
             } catch (\Doctrine\DBAL\DBALException  $e) {
                 $response->setData(array('errorCode' => 1, 'message' => 'Project not saved: ' . $e->getMessage()));
+                $logger->error('Error saving to database ' . $e->getMessage());
             }
         }else{
             $invalidStrings = $validCharacters["invalidStrings"];
@@ -51,6 +52,7 @@ class SimpleAPIController extends Controller
                 'errorCode' => 2,
                 'message' => 'Project not saved: '
                     . implode(",", $invalidStrings) . " contains invalid characters"));
+
         };
 
 
