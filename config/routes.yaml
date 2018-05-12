@@ -3,10 +3,6 @@ index:
     controller: App\Controller\DefaultController::index
 
 
-app_simple:
-    path: /simple/number
-    controller: App\Controller\SimpleController::number
-
 api_login_check:
     path: /api/login_check
 
