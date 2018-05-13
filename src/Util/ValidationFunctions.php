@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Utils;
+namespace App\Util;
 use Psr\Log\LoggerInterface;
 
 class ValidationFunctions
@@ -18,7 +18,7 @@ class ValidationFunctions
 
     // Check if any of the strings received contains an invalid character
     // returns the list of invalid strings
-    public function checkValidCharacters(LoggerInterface $logger, ...$strings): Array
+    public function checkValidCharacters(...$strings): Array
     {
         $hasOnlyValidCharacters = true;
         $invalidStrings = Array();
