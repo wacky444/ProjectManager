@@ -13,7 +13,15 @@ app_simple_api:
 app_create_project_api:
     path: /api/project/create/{projectName}/{projectDescription}
     controller: App\Controller\SimpleAPIController::createProject
+#    requirements:
+#        page: '\d+'
 
+app_create_entity_api:
+    path: /api/create/{type}/{name}/{description}/{projectId}
+    controller: App\Controller\SimpleAPIController::create
+    requirements:
+        type: 'Project|Task'
+    defaults:   { projectId: null, description: null }
 
 #fos user
 fos_user_security:

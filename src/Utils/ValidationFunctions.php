@@ -7,6 +7,11 @@ class ValidationFunctions
 {
 
     const INVALID_CHARACTERS = array("@", "#");
+    const ERROR_CODES = [
+        SUCCESS => 0,
+        QUERY_ERROR => 1,
+        INVALID_CHARACTERS => 2
+    ];
 
     // Check if any of the strings received contains an invalid character
     // returns the list of invalid strings
@@ -31,7 +36,8 @@ class ValidationFunctions
 
         return Array(
             'isValid' => $hasOnlyValidCharacters,
-            'invalidStrings' => $invalidStrings
+            'invalidStrings' => $invalidStrings,
+            'errorMessage' => implode(",", $invalidStrings) . " contains invalid characters"
         );
     }
 

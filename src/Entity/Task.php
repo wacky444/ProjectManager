@@ -31,6 +31,11 @@ class Task
      */
     private $description;
 
+    public function getId()
+    {
+        return $this->task_id;
+    }
+
     public function getTaskId()
     {
         return $this->task_id;

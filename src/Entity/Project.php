@@ -34,6 +34,11 @@ class Project
      */
     private $user_id;
 
+    public function getId()
+    {
+        return $this->project_id;
+    }
+
     public function getProjectId()
     {
         return $this->project_id;
@@ -74,4 +79,12 @@ class Project
 
         return $this;
     }
+
+    public function __construct($name, $user_id, $description = null)
+    {
+        $this->name = $name;
+        $this->user_id = $user_id;
+        $this->description = $description;
+    }
+
 }
