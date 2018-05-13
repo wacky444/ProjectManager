@@ -109,9 +109,19 @@ class SimpleAPIController extends Controller
                     $entity = $projectRepository->find($entityId);
 
                     if (!is_null($entity)) {
-                        // TODO check if $this->getUser() can edit this project
-                        $entity->setName($name);
-                        $entity->setDescription($description);
+                        // TODO check if $this->getUser() has permissions to edit this project, not only the owner
+                        if ($entity->getUser()->getUsername() == $this->getUser()) {
+                            $entity->setName($name);
+                            $entity->setDescription($description);
+                        }else{
+                            $entity = null;
+
+                            $response->setData(array(
+                                'errorCode' => $validationFunctions::ERROR_CODES['NOT_ALLOWED'],
+                                'message' => 'not allowed'  // TODO translate
+                            ));
+                        }
+
                     } else {
                         $response->setData(array(
                             'errorCode' => $validationFunctions::ERROR_CODES['PROJECT_NOT_FOUND'],
@@ -131,10 +141,19 @@ class SimpleAPIController extends Controller
                         $project = $projectRepository->find($projectId);
 
                         if (!is_null($project)) {
-                            // TODO check if $this->getUser() can edit the project of this task
-                            $entity->setName($name);
-                            $entity->setDescription($description);
-                            $entity->setProjectId($project);
+                            if ($project->getUser()->getUsername() == $this->getUser()) {
+                                $entity->setName($name);
+                                $entity->setDescription($description);
+                                $entity->setProjectId($project);
+                            }else{
+                                $entity = null;
+
+                                $response->setData(array(
+                                    'errorCode' => $validationFunctions::ERROR_CODES['NOT_ALLOWED'],
+                                    'message' => 'not allowed'  // TODO translate
+                                ));
+                            }
+
                         } else {
                             $response->setData(array(
                                 'errorCode' => $validationFunctions::ERROR_CODES['PROJECT_NOT_FOUND'],
@@ -187,56 +206,7 @@ class SimpleAPIController extends Controller
 
     }
 
-    public function createProject($projectName, $projectDescription, ValidationFunctions $validationFunctions,
-                                  LoggerInterface $logger)
-    {
-        $response = new JsonResponse(); // Automatically sets the 'Content-Type'
 
-        $entityManager = $this->getDoctrine()->getManager();
-
-        //Check that the input has only valid characters
-        $validCharacters = $validationFunctions->checkValidCharacters($logger, $projectName, $projectDescription);
-
-        if ($validCharacters["isValid"]) {
-            $project = new Project();
-            $project->setName($projectName);
-            $project->setDescription($projectDescription);
-            $project->setUserId($this->getUser());
-
-            // tell Doctrine to (eventually) save the object (no queries yet)
-            $entityManager->persist($project);
-
-            try {
-                // actually executes the queries (i.e. the INSERT query)
-                $entityManager->flush();
-                $response->setData(array(
-                    'errorCode' => 0,
-                    'message' => 'Project saved successfully',  // TODO translate
-                    'projectId' => $project->getProjectId()
-                ));
-
-            } catch (\Doctrine\DBAL\DBALException  $e) {
-                $response->setData(array('errorCode' => 1, 'message' => 'Project not saved: ' . $e->getMessage()));
-                $logger->error('Error saving to database ' . $e->getMessage());
-            }
-        } else {
-            $invalidStrings = $validCharacters["invalidStrings"];
-
-            $response->setData(array(
-                'errorCode' => 2,
-                'message' => 'Project not saved: '
-                    . $validCharacters['errorMessage']));
-
-        };
-
-
-        return $response;
-    }
-
-    public function addTask($project, $taskName, $taskDescription)
-    {
-
-    }
 
 
 }

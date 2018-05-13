@@ -12,7 +12,8 @@ class ValidationFunctions
         'QUERY_ERROR' => 1,
         'INVALID_CHARACTERS' => 2,
         'PROJECT_NOT_FOUND' => 3,
-        'TASK_NOT_FOUND' => 4
+        'TASK_NOT_FOUND' => 4,
+        'NOT_ALLOWED' => 5
     ];
 
     // Check if any of the strings received contains an invalid character

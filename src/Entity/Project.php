@@ -68,7 +68,7 @@ class Project
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): ?User
     {
         return $this->user_id;
     }

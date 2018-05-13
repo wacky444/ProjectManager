@@ -10,12 +10,6 @@ app_simple_api:
     path: /api/simple/number
     controller: App\Controller\SimpleAPIController::number
 
-app_create_project_api:
-    path: /api/project/create/{projectName}/{projectDescription}
-    controller: App\Controller\SimpleAPIController::createProject
-#    requirements:
-#        page: '\d+'
-
 app_create_entity_api:
     path: /api/create/{type}/{name}/{description}/{projectId}
     controller: App\Controller\SimpleAPIController::create
@@ -25,6 +19,15 @@ app_create_entity_api:
 
 app_update_entity_api:
     path: /api/update/{type}/{entityId}/{name}/{description}/{projectId}
+    controller: App\Controller\SimpleAPIController::update
+    requirements:
+        type: 'Project|Task'
+        entityId: \d+
+    defaults:   { projectId: null, description: null }
+
+
+app_remove_entity_api:
+    path: /api/remove/{type}/{entityId}/{name}/{description}/{projectId}
     controller: App\Controller\SimpleAPIController::update
     requirements:
         type: 'Project|Task'
