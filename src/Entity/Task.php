@@ -17,7 +17,8 @@ class Task
     private $task_id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="project_id")
      */
     private $project_id;
 
@@ -41,12 +42,12 @@ class Task
         return $this->task_id;
     }
 
-    public function getProjectId(): ?int
+    public function getProjectId(): ?Project
     {
         return $this->project_id;
     }
 
-    public function setProjectId(int $project_id): self
+    public function setProjectId(Project $project_id): self
     {
         $this->project_id = $project_id;
 
@@ -75,5 +76,12 @@ class Task
         $this->description = $description;
 
         return $this;
+    }
+
+    public function __construct($name, $project_id, $description = null)
+    {
+        $this->name = $name;
+        $this->project_id = $project_id;
+        $this->description = $description;
     }
 }

@@ -8,9 +8,11 @@ class ValidationFunctions
 
     const INVALID_CHARACTERS = array("@", "#");
     const ERROR_CODES = [
-        SUCCESS => 0,
-        QUERY_ERROR => 1,
-        INVALID_CHARACTERS => 2
+        'SUCCESS' => 0,
+        'QUERY_ERROR' => 1,
+        'INVALID_CHARACTERS' => 2,
+        'PROJECT_NOT_FOUND' => 3,
+        'TASK_NOT_FOUND' => 4
     ];
 
     // Check if any of the strings received contains an invalid character

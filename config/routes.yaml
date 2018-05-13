@@ -23,6 +23,14 @@ app_create_entity_api:
         type: 'Project|Task'
     defaults:   { projectId: null, description: null }
 
+app_update_entity_api:
+    path: /api/update/{type}/{entityId}/{name}/{description}/{projectId}
+    controller: App\Controller\SimpleAPIController::update
+    requirements:
+        type: 'Project|Task'
+        entityId: \d+
+    defaults:   { projectId: null, description: null }
+
 #fos user
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/security.xml"

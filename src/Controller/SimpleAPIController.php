@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Project;
+use App\Entity\Task;
+use App\Repository\TaskRepository;
 use Doctrine\ORM\Mapping\Entity;
 use PhpParser\Node\Stmt\Switch_;
 use Psr\Log\LoggerInterface;
@@ -25,44 +28,155 @@ class SimpleAPIController extends Controller
 
         $validCharacters = $validationFunctions->checkValidCharacters($logger, $name, $description);
 
-        $newEntity = new Entity();
+        $newEntity = null;
 
         if ($validCharacters["isValid"]) {
-            Switch($type){
+            Switch ($type) {
                 case 'Project':
                     $newEntity = new Project($name, $this->getUser(), $description);
 
 
                     break;
                 case 'Task':
+                    $projectRepository = $this->getDoctrine()->getRepository(Project::class);
+
+                    $project = $projectRepository->find($projectId);
+
+                    if (!is_null($project)) {
+                        $newEntity = new Task($name, $project, $description);
+                    } else {
+                        $response->setData(array(
+                            'errorCode' => $validationFunctions::ERROR_CODES['PROJECT_NOT_FOUND'],
+                            'message' => $type . ' project not found with the id '  // TODO translate
+                        ));
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            // The entity is ready to be saved
+            if (!is_null($newEntity)) {
+                // tell Doctrine to (eventually) save the object (no queries yet)
+                $entityManager->persist($newEntity);
+
+                try {
+                    // actually executes the queries (i.e. the INSERT query)
+                    $entityManager->flush();
+                    $response->setData(array(
+                        'errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
+                        'message' => $type . ' saved successfully',  // TODO translate
+                        'entityId' => $newEntity->getId()
+                    ));
+
+                } catch (\Doctrine\DBAL\DBALException  $e) {
+                    $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
+                        'message' => $type . ' not saved: ' . $e->getMessage()));
+                    $logger->error('Error saving to database ' . $e->getMessage());
+                }
+            }
+        } else {
+            $response->setData(array(
+                'errorCode' => $validationFunctions::ERROR_CODES['INVALID_CHARACTERS'],
+                'message' => $type . ' not saved: '
+                    . $validCharacters['errorMessage']));
+
+        };
+
+
+        return $response;
+
+    }
+
+    // update project or task
+    public function update($entityId, $type, $name, $description, $projectId, ValidationFunctions $validationFunctions,
+                           LoggerInterface $logger)
+    {
+
+        $response = new JsonResponse(); // Automatically sets the 'Content-Type'
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $validCharacters = $validationFunctions->checkValidCharacters($logger, $name, $description);
+
+        $entity = null;
+
+        if ($validCharacters["isValid"]) {
+            Switch ($type) {
+                case 'Project':
+                    $projectRepository = $this->getDoctrine()->getRepository(Project::class);
+                    $entity = $projectRepository->find($entityId);
+
+                    if (!is_null($entity)) {
+                        // TODO check if $this->getUser() can edit this project
+                        $entity->setName($name);
+                        $entity->setDescription($description);
+                    } else {
+                        $response->setData(array(
+                            'errorCode' => $validationFunctions::ERROR_CODES['PROJECT_NOT_FOUND'],
+                            'message' => $type . ' not found with the id ' . $entityId  // TODO translate
+                        ));
+                    }
+
+
+                    break;
+                case 'Task':
+                    $taskRepository = $this->getDoctrine()->getRepository(Task::class);
+                    $entity = $taskRepository->find($entityId);
+
+                    if (!is_null($entity)) {
+
+                        $projectRepository = $this->getDoctrine()->getRepository(Project::class);
+                        $project = $projectRepository->find($projectId);
+
+                        if (!is_null($project)) {
+                            // TODO check if $this->getUser() can edit the project of this task
+                            $entity->setName($name);
+                            $entity->setDescription($description);
+                            $entity->setProjectId($project);
+                        } else {
+                            $response->setData(array(
+                                'errorCode' => $validationFunctions::ERROR_CODES['PROJECT_NOT_FOUND'],
+                                'message' => $type . ' project not found with the id '  // TODO translate
+                            ));
+                        }
+                    } else {
+                        $response->setData(array(
+                            'errorCode' => $validationFunctions::ERROR_CODES['TASK_NOT_FOUND'],
+                            'message' => $type . ' not found with the id ' . $entityId // TODO translate
+                        ));
+                    }
 
 
                     break;
                 default:
-
                     break;
             }
 
-            // tell Doctrine to (eventually) save the object (no queries yet)
-            $entityManager->persist($newEntity);
+            // The entity is ready to be saved
+            if (!is_null($entity)) {
+                // tell Doctrine to (eventually) save the object (no queries yet)
+                $entityManager->persist($entity);
 
-            try {
-                // actually executes the queries (i.e. the INSERT query)
-                $entityManager->flush();
-                $response->setData(array(
-                    'errorCode' => 0,
-                    'message' => $type . ' saved successfully',  // TODO translate
-                    'entityId' => $newEntity->getId()
-                ));
+                try {
+                    // actually executes the queries (i.e. the INSERT query)
+                    $entityManager->flush();
+                    $response->setData(array(
+                        'errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
+                        'message' => $type . ' saved successfully',  // TODO translate
+                        'entityId' => $entity->getId()
+                    ));
 
-            } catch (\Doctrine\DBAL\DBALException  $e) {
-                $response->setData(array('errorCode' => 1, 'message' => $type . ' not saved: ' . $e->getMessage()));
-                $logger->error('Error saving to database ' . $e->getMessage());
+                } catch (\Doctrine\DBAL\DBALException  $e) {
+                    $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
+                        'message' => $type . ' not saved: ' . $e->getMessage()));
+                    $logger->error('Error saving to database ' . $e->getMessage());
+                }
             }
-
         } else {
             $response->setData(array(
-                'errorCode' => 2,
+                'errorCode' => $validationFunctions::ERROR_CODES['INVALID_CHARACTERS'],
                 'message' => $type . ' not saved: '
                     . $validCharacters['errorMessage']));
 
@@ -123,8 +237,6 @@ class SimpleAPIController extends Controller
     {
 
     }
-
-
 
 
 }
