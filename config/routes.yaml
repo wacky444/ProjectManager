@@ -25,14 +25,12 @@ app_update_entity_api:
         entityId: \d+
     defaults:   { projectId: null, description: null }
 
-
 app_remove_entity_api:
-    path: /api/remove/{type}/{entityId}/{name}/{description}/{projectId}
-    controller: App\Controller\SimpleAPIController::update
+    path: /api/remove/{type}/{entityId}
+    controller: App\Controller\SimpleAPIController::remove
     requirements:
         type: 'Project|Task'
         entityId: \d+
-    defaults:   { projectId: null, description: null }
 
 #fos user
 fos_user_security:

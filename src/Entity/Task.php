@@ -42,7 +42,7 @@ class Task
         return $this->task_id;
     }
 
-    public function getProjectId(): ?Project
+    public function getProject(): ?Project
     {
         return $this->project_id;
     }

@@ -34,6 +34,12 @@ class Project
      */
     private $user_id;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Task", mappedBy="project_id", cascade={"persist", "remove"})
+     */
+    private $task_id;
+
+
     public function getId()
     {
         return $this->project_id;
