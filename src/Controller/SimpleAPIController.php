@@ -12,6 +12,10 @@ use Psr\Log\LoggerInterface;
 use App\Util\ValidationFunctions;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class SimpleAPIController extends Controller
 {
@@ -65,13 +69,13 @@ class SimpleAPIController extends Controller
                     // actually executes the queries (i.e. the INSERT query)
                     $entityManager->flush();
                     $response->setData(array(
-                        'errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
+                        'errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
                         'message' => $type . ' saved successfully',  // TODO translate
                         'entityId' => $newEntity->getId()
                     ));
 
                 } catch (\Doctrine\DBAL\DBALException  $e) {
-                    $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
+                    $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
                         'message' => $type . ' not saved: ' . $e->getMessage()));
                     $logger->error('Error saving to database ' . $e->getMessage());
                 }
@@ -182,13 +186,13 @@ class SimpleAPIController extends Controller
                     // actually executes the queries (i.e. the INSERT query)
                     $entityManager->flush();
                     $response->setData(array(
-                        'errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
+                        'errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
                         'message' => $type . ' saved successfully',  // TODO translate
                         'entityId' => $entity->getId()
                     ));
 
                 } catch (\Doctrine\DBAL\DBALException  $e) {
-                    $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
+                    $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
                         'message' => $type . ' not saved: ' . $e->getMessage()));
                     $logger->error('Error saving to database ' . $e->getMessage());
                 }
@@ -284,13 +288,13 @@ class SimpleAPIController extends Controller
                 // actually executes the queries (i.e. the INSERT query)
                 $entityManager->flush();
                 $response->setData(array(
-                    'errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
+                    'errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
                     'message' => $type . ' saved successfully',  // TODO translate
                     'entityId' => $entity->getId()
                 ));
 
             } catch (\Doctrine\DBAL\DBALException  $e) {
-                $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
+                $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
                     'message' => $type . ' not saved: ' . $e->getMessage()));
                 $logger->error('Error saving to database ' . $e->getMessage());
             }
@@ -304,7 +308,7 @@ class SimpleAPIController extends Controller
 
 
     // create project or task
-    public function list($type, $projectId, ValidationFunctions $validationFunctions,
+    public function list($type, $entityId, ValidationFunctions $validationFunctions,
                            LoggerInterface $logger)
     {
 
@@ -323,7 +327,7 @@ class SimpleAPIController extends Controller
                 if (!is_null($entity)) {
                     // TODO check if $this->getUser() has permissions to edit this project, not only the owner
                     if ($entity->getUser()->getUsername() == $this->getUser()) {
-                        $entityManager->remove($entity);
+
                     }else{
                         $entity = null;
 
@@ -349,7 +353,7 @@ class SimpleAPIController extends Controller
                 if (!is_null($entity)) {
 
                     if ($entity->getProject()->getUser()->getUsername() == $this->getUser()) {
-                        $entityManager->remove($entity);
+
 
                     }else{
                         $entity = null;
@@ -374,22 +378,24 @@ class SimpleAPIController extends Controller
 
         // The entity is ready to be saved
         if (!is_null($entity)) {
-            // tell Doctrine to (eventually) save the object (no queries yet)
 
-            try {
-                // actually executes the queries (i.e. the INSERT query)
-                $entityManager->flush();
-                $response->setData(array(
-                    'errorCode' => $validationFunctions::ERROR_CODES['QUERY_ERROR'],
-                    'message' => $type . ' saved successfully',  // TODO translate
-                    'entityId' => $entity->getId()
+            $encoders = array(new XmlEncoder(), new JsonEncoder());
+            $normalizers = array((new ObjectNormalizer())
+                ->setIgnoredAttributes(array( // TODO use entity annotations
+                        'password', 'email', 'emailCanonical', 'plainPassword', 'salt',
+                        'lastLogin', 'location', 'confirmationToken', 'roles', 'accountNonExpired',
+                        'accountNonLocked', 'credentialsNonExpired', 'enabled', 'superAdmin', 'passwordRequestedAt',
+                        'groups', 'groupNames')
                 ));
+            $serializer = new Serializer($normalizers, $encoders);
+            $jsonContent = $serializer->serialize($entity, 'json',array('groups' => array('api')));
 
-            } catch (\Doctrine\DBAL\DBALException  $e) {
-                $response->setData(array('errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
-                    'message' => $type . ' not saved: ' . $e->getMessage()));
-                $logger->error('Error saving to database ' . $e->getMessage());
-            }
+            $response->setData(array(
+                'entity' => $jsonContent,
+                'errorCode' => $validationFunctions::ERROR_CODES['SUCCESS'],
+                'message' => $type . ' loaded successfully',  // TODO translate
+                'entityId' => $entity->getId()
+            ));
         }
 
 

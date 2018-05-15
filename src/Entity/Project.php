@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 use App\Entity\User as User;
 
@@ -15,6 +16,7 @@ class Project
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"api"})
      */
     private $project_id;
 
@@ -31,6 +33,7 @@ class Project
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="user_id")
+     * @Groups({"user"})
      */
     private $user_id;
 

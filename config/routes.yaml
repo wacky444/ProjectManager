@@ -33,11 +33,10 @@ app_remove_entity_api:
         entityId: \d+
 
 app_list_entity_api:
-    path: /api/list/{type}/{projectId}
+    path: /api/list/{type}/{entityId}
     controller: App\Controller\SimpleAPIController::list
     requirements:
         type: 'Project|Task'
-    defaults:   { projectId: null }
 
 #fos user
 fos_user_security:
