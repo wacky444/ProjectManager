@@ -15,7 +15,7 @@ Features
 
 * Create, edit, list or remove projects and tasks
 * Symfony 4
-* Postgres SQL
+* Postgre SQL
 * Doctrine ORM
 * JWT (Json Web Token) authentication
 * Unit testing
